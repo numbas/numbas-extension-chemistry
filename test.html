@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="../../tests/jme-runtime.js"></script>
+        <script src="../../tests/locales.js"></script>
+        <script src="chemistry.js"></script>
+        <style>
+            .log {
+                font-family: monospace;
+            }
+            .log.error {
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <ul id="tests"></ul>
+
+        <script>
+			Numbas.queueScript('base',[],function() {});
+			Numbas.queueScript('go',['jme','localisation','extensions/chemistry/chemistry.js'],function() {
+                var s = window.scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,Numbas.extensions.chemistry.scope]);
+                var treeToJME = Numbas.jme.display.treeToJME.bind(Numbas.jme.display);
+
+                function run(expr) {
+                    try {
+                        var res = s.evaluate(expr);
+                        log(`${expr}:\t${Numbas.jme.display.treeToJME({tok:res})}\t(${res.type})`);
+                    } catch(e) {
+                        error(`${expr}: ${e.message}`);
+                    }
+                }
+
+                function element(name,attr,content) {
+                    var e = document.createElement(name);
+                    if(attr) {
+                        for(var x in attr) {
+                            e.setAttribute(x,attr[x]);
+                        }
+                    }
+                    if(content!==undefined) {
+                        e.innerHTML = content;
+                    }
+                    return e;
+                }
+
+                var tests = document.getElementById('tests');
+                function log() {
+                    var str = Array.prototype.join.call(arguments,' ');
+                    console.log(str);
+                    var li = element('li',{class:'log'},str.replace(/\n/g,'<br>'));
+                    tests.appendChild(li);
+                }
+                function error() {
+                    var str = Array.prototype.join.call(arguments);
+                    console.error(str);
+                    var li = element('li',{class:'log error'},str.replace(/\n/g,'<br>'));
+                    tests.appendChild(li);
+                }
+
+                function produces(expr,expected) {
+                    try {
+                        var result = Numbas.jme.display.treeToJME({tok:s.evaluate(expr)});
+                        if(result==expected) {
+                            log('✓ ', expr+' = '+expected);
+                        } else {
+                            error('✕', expr+'\nSaw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '+result+'\nExpected: '+expected);
+                        }
+                    } catch(e) {
+                        error(expr+'\n'+e.message);
+                    }
+                }
+
+                var ops = [
+                    'atom("Na")',
+                    'atom("Na")',
+                    'atom(11)',
+                    'name(atom("Na"))',
+                    'name(atom("Na",19))',
+                    'symbol(atom("Na"))',
+                    'string(atom("Na"))',
+                    'string(atom("Na",19))',
+                    'atom("C",13)["Isotopic Composition"]',
+                    'neutrons(atom("Na"))',
+                    'mass_number(atom("Na"))',
+                    'abundance(atom("Na"))',
+                    'atomic_number(atom("Na",19))',
+                    'neutrons(atom("Na",19))',
+                    'mass_number(atom("Na",19))',
+                    'abundance(atom("Na",19))',
+                    'atom("Na")',
+                    'relative_mass(atom("C"))',
+                    'relative_mass(atom("C",12))',
+                    'isotopes(atom("H"))',
+                    'formula("H2O")',
+                    'string(formula("H2O"))',
+                    'plain_string(formula("H2O"))',
+                    'atom_counts(formula("C(CH3)4"))',
+                    'mass(formula("C(CH3)4"))',
+                    'map([x,abundance(atom("C",x))],x,isotopes(atom("C")))',
+                ];
+                ops.forEach(run);
+                
+            });
+        </script>
+    </body>
+</html>

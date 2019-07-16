@@ -19,20 +19,40 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
 
     var types = chemistry.types = {};
 
+    chemistry.isotope_data = isotope_data;
+    chemistry.periodic_table_data = periodic_table_data;
+    chemistry.thermodynamic_data = thermodynamic_data;
 
-    function element_with_symbol(symbol) {
+    /** Get data corresponding to an element with the given symbol
+     * @param {String} symbol
+     * @returns {periodic_table_data}
+     */
+    var element_with_symbol = chemistry.element_with_symbol = function(symbol) {
         return periodic_table_data.find(function(d) { return d.symbol == symbol; });
     }
 
-    function element_with_name(name) {
+    /** Get data corresponding to an element with the given name
+     * @param {String} name
+     * @returns {periodic_table_data}
+     */
+    var element_with_name = chemistry.element_with_name = function(name) {
         return periodic_table_data.find(function(d) { return d.name.toLowerCase() == name.toLowerCase(); });
     }
 
-    function element_by_number(number) {
+    /** Get data corresponding to an element with the given atomic number
+     * @param {Number} number
+     * @returns {periodic_table_data}
+     */
+    var element_by_number = chemistry.element_by_number = function(number) {
         return periodic_table_data.find(function(d) { return d.atomicNumber == number; });
     }
 
-    function get_isotope(atomic_number,mass_number) {
+    /** Get data corresponding to a particular isotope
+     * @param {Number} atomic_number
+     * @param {Number} mass_number
+     * @returns {isotope_data}
+     */
+    var get_isotope = chemistry.get_isotope = function(atomic_number,mass_number) {
         var atom = isotope_data[atomic_number];
         if(!atom) {
             throw(new Error("No data for atom number "+atomic_number));
@@ -59,7 +79,11 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
         }
     }
 
-    function Atom(data,isotope) {
+    /** Representation of an isotope of a particular element
+     * @param {periodic_table_data} data
+     * @param {isotope_data} [isotope] - if not given, the most common isotope will be used
+     */
+    var Atom = chemistry.Atom = function(data,isotope) {
         this.data = data;
         this.symbol = this.data.symbol;
         this.atomic_number = data.atomicNumber;
@@ -69,6 +93,9 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
         this.relative_atomic_mass = parse_uncertain_number(this.isotope_specified ? this.isotope['Relative Atomic Mass'] : this.data.atomicMass);
     }
     Atom.prototype = {
+        /** An English name for the atom
+         * @returns {String}
+         */
         name: function() {
             var name = this.data.name.toLowerCase();
             if(this.isotope_specified) {
@@ -76,9 +103,18 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
             }
             return name;
         },
+
+        /** Mass numbers of common isotopes of this element
+         * @returns {Array.<Number>}
+         */
         isotopes: function() {
             return Object.keys(isotope_data[this.atomic_number]).map(function(m){return parseInt(m)});
         },
+
+        /** A TeX representation of this atom.
+         * If no isotope was specified, just the symbol is returned
+         * @returns {TeX}
+         */
         tex: function() {
             if(this.isotope_specified) {
                 return '{}^{'+this.mass_number+'} \\mathrm{'+this.symbol+'}';
@@ -86,6 +122,9 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
                 return '\\mathrm{'+this.symbol+'}';
             }
         },
+        /** JME representation of this atom.
+         * @returns {JME}
+         */
         jme: function() {
             if(this.isotope_specified) {
                 return 'atom("'+this.symbol+'",'+this.mass_number+')';
@@ -93,6 +132,9 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
                 return 'atom("'+this.symbol+'")';
             }
         },
+        /** String representation of this atom. If a mass number was specified, it's included as a superscript.
+         * @returns {String}
+         */
         string: function() {
             if(this.isotope_specified) {
                 return superscript(this.mass_number)+this.symbol;
@@ -100,6 +142,10 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
                 return this.symbol;
             }
         },
+        /** Relative abundance of this isotope. 
+         * If no isotope was specified, returns 1.
+         * @returns {Number}
+         */
         abundance: function() {
             if(this.isotope_specified) {
                 return parse_uncertain_number(this.isotope['Isotopic Composition'] || '0');
@@ -124,6 +170,7 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
     }
 
     /** A chemical formula.
+     * @see parse_formula
      */
     function Formula(formula) {
         this.formula = formula;

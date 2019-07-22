@@ -17,7 +17,7 @@ Give `mass number` to specify a particular isotope.
 
 * `atom("Na")`
 * `atom("Na",19)`
-* `atom(11)
+* `atom(11)`
 
 ### `name(atom)`
 
@@ -108,8 +108,8 @@ Construct a compound from the given formula.
 **Examples:**
 
 * `formula("H2O")`
-* `formula("C(CH3)4")
-* `formula("2(N2)")
+* `formula("C(CH3)4")`
+* `formula("2(N2)")`
 
 ### `string(formula)`
 

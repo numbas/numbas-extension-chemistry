@@ -21,6 +21,7 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
     chemistry.isotope_data = isotope_data;
     chemistry.periodic_table_data = periodic_table_data;
     chemistry.thermodynamic_data = thermodynamic_data;
+    chemistry.parse_formula = parse_formula;
 
     /** Get data corresponding to an element with the given symbol
      * @param {String} symbol
@@ -171,7 +172,7 @@ Numbas.addExtension('chemistry',['math','jme','jme-display'],function(chemistry)
     /** A chemical formula.
      * @see parse_formula
      */
-    function Formula(formula) {
+    var Formula = chemistry.Formula = function(formula) {
         this.formula = formula;
     }
     Formula.prototype = {

@@ -47,10 +47,6 @@ function parse_formula(str) {
     }
 }
 
-function debug(msg,tokens) {
-    console.log(msg,tokens.map(t=>t.str).join(''));
-}
-
 function stoichiometry(tokens) {
     if(tokens[0].type=='number') {
         var n = parseInt(tokens[0].str);
